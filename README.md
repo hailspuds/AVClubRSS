@@ -54,7 +54,8 @@ Also, the commas and single inverted commas are important. So are both the brack
 
 
 ##### Thanks
-Thanks to mibe who maintains[FeedWriter](https://github.com/mibe/FeedWriter) for the PHP library which creates the RSS feed.
+Thanks to mibe who maintains [FeedWriter](https://github.com/mibe/FeedWriter) for the PHP library which creates the RSS feed.
+
 Thanks to S.C. Chen who maitains [PHP Simple HTML DOM Parser](http://simplehtmldom.sourceforge.net/) which scrapes AVClub so it can be added to the RSS feed.
 
 
