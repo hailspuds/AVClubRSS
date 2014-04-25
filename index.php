@@ -1,17 +1,24 @@
 <?
 include 'simple_html_dom.php';
-
 include 'Feeds/Item.php';
 include 'Feeds/Feed.php';
 include 'Feeds/RSS2.php';
+use \FeedWriter\RSS2;
+date_default_timezone_set('UTC');
 
-// RSS TV SHOW LIST
+//List of shows - to add a new show to your personalised RSS list, just add it to the array below.
 $show_list = array(
 			'http://www.avclub.com/tv/game-of-thrones-experts/', 
 			'http://www.avclub.com/tv/game-of-thrones-newbies/',
+			'http://www.avclub.com/tv/community/',
+			'http://www.avclub.com/tv/parks-and-recreation/',
+			
 		);
-$episodes = array();
 
+
+//Code below
+
+$episodes = array();
 
 foreach ($show_list as $key => $show) 
 {
@@ -39,16 +46,29 @@ foreach ($show_list as $key => $show)
 			foreach($tv_review->find('span.episode') as $episode)
 			{
 				$each_episode['episode'] = trim($episode->plaintext);
-			}		
+			}
+			$time = "";
+			$date = "";
+			foreach($tv_review->find('span.date') as $date)
+			{
+				$date = $date->plaintext;
+			}
+			foreach($tv_review->find('span.time') as $time)
+			{
+				$time = $time->plaintext;
+			}						
+			
+			$each_episode['timedate'] = strtotime($date . $time);
+			$each_episode['timedate_human'] = date('Y-m-d H:m', $each_episode['timedate']);
 			array_push($episodes, $each_episode);
 		}
 	
 	}
 }
 
+uasort($episodes, 'do_compare');
+
 //Create Feed
-date_default_timezone_set('UTC');
-use \FeedWriter\RSS2;
 $TestFeed = new RSS2;
 
 //Use wrapper functions for common channel elements
@@ -61,22 +81,19 @@ foreach ($episodes as $key => $episode)
 	$feed = $TestFeed->createNewItem();
 	$feed->setTitle($episode['title']);
 	$feed->setLink($episode['url']);
-	$feed->setDate(time());
+	$feed->setDate($episode['timedate']);
 	$feed->setDescription($episode['title'] . " - " . $episode['season'] . " " . $episode['episode']);
 	
 	$TestFeed->addItem($feed);
 }
 
 $TestFeed->printFeed();  
-//print_r($episodes);
-/*
-    [17] => Array
-        (
-            [title] => Community: “Repilot”/“Introduction To Teaching”
-            [url] => http://www.avclub.com/tvclub/repilotintroduction-to-teaching-106548
-            [season] => Season 5
-            [episode] => Episode 2
-        )
-*/
+
+
+function do_compare($item1, $item2) {
+    $ts1 = $item1['timedate'];
+    $ts2 = $item2['timedate'];
+    return $ts2 - $ts1;
+}
 ?>
 
